@@ -39,8 +39,10 @@ function loadCompaniesForSessionSelection() {
 
     // Show company selection card, hide client selection and client session view
     document.getElementById('sessionCompanySelectionCard').style.display = 'block';
+    document.getElementById('sessionPrivateSelectionCard').style.display = 'none';
     document.getElementById('sessionClientSelectionCard').style.display = 'none';
     document.getElementById('clientSessionView').style.display = 'none';
+    document.getElementById('privateClientView').style.display = 'none';
 }
 
 function loadPrivateClientsForSessionSelection() {
