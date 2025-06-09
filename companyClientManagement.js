@@ -105,3 +105,85 @@ function deleteClient(clientId) {
         }
     }
 }
+
+// Gestione clienti privati
+function addPrivateClient() {
+    const firstName = document.getElementById('privateFirstName').value.trim();
+    const lastName = document.getElementById('privateLastName').value.trim();
+    const phone = document.getElementById('privatePhone').value.trim();
+    const email = document.getElementById('privateEmail').value.trim();
+
+    if (!firstName || !lastName) {
+        alert('Inserisci nome e cognome');
+        return;
+    }
+
+    const client = {
+        id: Date.now(),
+        firstName,
+        lastName,
+        phone,
+        email
+    };
+
+    appData.privateClients.push(client);
+    saveDataToLocalStorage();
+    closeModal('addPrivateClientModal');
+    renderPrivateClients();
+}
+
+function deletePrivateClient(clientId) {
+    if (confirm('Sei sicuro di voler eliminare questo cliente?')) {
+        appData.privateClients = appData.privateClients.filter(c => c.id !== clientId);
+        saveDataToLocalStorage();
+        renderPrivateClients();
+    }
+}
+
+function showAddPrivateClientModal() {
+    document.getElementById('privateFirstName').value = '';
+    document.getElementById('privateLastName').value = '';
+    document.getElementById('privatePhone').value = '';
+    document.getElementById('privateEmail').value = '';
+    showModal('addPrivateClientModal');
+}
+
+function renderPrivateClients() {
+    const grid = document.getElementById('privateClientGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    if (appData.privateClients.length === 0) {
+        grid.innerHTML = '<p class="text-center text-muted">Nessun cliente privato aggiunto.</p>';
+    } else {
+        appData.privateClients.forEach(client => {
+            const card = document.createElement('div');
+            card.className = 'client-card';
+            card.innerHTML = `
+                <button class="delete-btn" onclick="event.stopPropagation(); deletePrivateClient(${client.id})">×</button>
+                <h3>${client.firstName} ${client.lastName}</h3>
+                <p>${client.phone || ''}</p>
+                <p>${client.email || ''}</p>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    const filter = document.getElementById('privateClientSearch')?.value.toLowerCase() || '';
+    const tbody = document.querySelector('#privateClientTable tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const filtered = appData.privateClients.filter(c =>
+        `${c.firstName} ${c.lastName}`.toLowerCase().includes(filter)
+    );
+
+    filtered.forEach(c => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${c.firstName}</td><td>${c.lastName}</td><td>${c.phone || ''}</td><td>${c.email || ''}</td>`;
+        tbody.appendChild(row);
+    });
+
+    const countEl = document.getElementById('privateClientCount');
+    if (countEl) countEl.textContent = `Totale clienti privati: ${filtered.length}`;
+}
