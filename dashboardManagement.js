@@ -47,8 +47,8 @@ function addGlobalTodo() {
 
 function toggleTodo(type, index) {
     if (type === 'client') {
-        const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-        const client = company.clients.find(c => c.id === appData.currentClientId);
+        const client = getCurrentClient();
+        if (!client) return;
         client.todos[index].completed = !client.todos[index].completed;
         displayClientTodos(client);
     } else {
@@ -60,8 +60,8 @@ function toggleTodo(type, index) {
 
 function removeTodo(type, index) {
     if (type === 'client') {
-        const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-        const client = company.clients.find(c => c.id === appData.currentClientId);
+        const client = getCurrentClient();
+        if (!client) return;
         if (confirm('Sei sicuro di voler rimuovere questo To-Do per il cliente?')) {
             client.todos.splice(index, 1);
             displayClientTodos(client);

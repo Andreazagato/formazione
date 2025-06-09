@@ -47,6 +47,8 @@ function loadCompaniesForSessionSelection() {
 
 function loadPrivateClientsForSessionSelection() {
     appData.currentSessionType = 'private';
+    appData.currentCompanyId = null;
+    appData.currentClientId = null;
     const grid = document.getElementById('sessionPrivateClientGrid');
     grid.innerHTML = '';
 
@@ -70,34 +72,20 @@ function loadPrivateClientsForSessionSelection() {
 }
 
 function showPrivateClientCard(clientId) {
-    const client = appData.privateClients.find(c => c.id === clientId);
-    if (!client) return;
-
-    appData.currentClientId = clientId;
-    document.getElementById('privateClientNameDisplay').textContent = `${client.firstName} ${client.lastName}`;
-    document.getElementById('privateClientInfoDisplay').innerHTML = `
-        <p><strong>Telefono:</strong> ${client.phone || ''}</p>
-        <p><strong>Email:</strong> ${client.email || ''}</p>`;
-
-    document.getElementById('privateClientView').style.display = 'block';
-    document.getElementById('sessionPrivateSelectionCard').style.display = 'none';
+    loadClientSession(clientId);
 }
 
 
 function loadClientSession(clientId) {
-    const companyId = appData.currentCompanyId; // Usa stored currentCompanyId
-    
-    if (!companyId || !clientId) {
+    if (!clientId) {
         document.getElementById('clientSessionView').style.display = 'none';
         return;
     }
-    
+
     appData.currentClientId = clientId;
-    
-    // Trova l'azienda e il cliente corretti
-    const company = appData.companies.find(c => c.id === companyId);
-    const client = company ? company.clients.find(c => c.id === clientId) : null;
-    
+
+    const client = getCurrentClient();
+
     if (!client) {
         alert('Cliente non trovato. Assicurati che l\'azienda e il cliente siano selezionati correttamente.');
         document.getElementById('clientSessionView').style.display = 'none';
@@ -116,14 +104,15 @@ function loadClientSession(clientId) {
     document.getElementById('clientSessionView').style.display = 'block';
     // Nascondi le card di selezione cliente dopo aver caricato la sessione
     document.getElementById('sessionClientSelectionCard').style.display = 'none';
+    document.getElementById('sessionPrivateSelectionCard').style.display = 'none';
+    document.getElementById('privateClientView').style.display = 'none';
 }
 
 function addHabit() {
     const name = prompt('Nome dell\'abitudine:');
     if (!name) return;
-    
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     client.profile.habits.push({
         name: name,
@@ -135,8 +124,8 @@ function addHabit() {
 }
 
 function removeHabit(index) {
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     if (confirm('Sei sicuro di voler rimuovere questa abitudine?')) {
         client.profile.habits.splice(index, 1);
@@ -146,8 +135,8 @@ function removeHabit(index) {
 }
 
 function updateHabitCategory(index, category) {
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     client.profile.habits[index].category = category;
     saveDataToLocalStorage();
@@ -156,9 +145,8 @@ function updateHabitCategory(index, category) {
 function addStrength() {
     const name = prompt('Nome del punto di forza:');
     if (!name) return;
-    
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     client.profile.strengths.push(name);
     
@@ -167,8 +155,8 @@ function addStrength() {
 }
 
 function removeStrength(index) {
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     if (confirm('Sei sicuro di voler rimuovere questo punto di forza?')) {
         client.profile.strengths.splice(index, 1);
@@ -185,8 +173,8 @@ function addImprovementArea() {
     const tagsInput = prompt('Inserisci i tag per questa area di miglioramento (separati da virgola, es: "Urgente, Priorità Alta"):', '');
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : [];
     
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     client.profile.improvementAreas.push({ name: name, tags: tags }); // Salva come oggetto con name e tags
     
@@ -195,8 +183,8 @@ function addImprovementArea() {
 }
 
 function removeImprovementArea(index) {
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     if (confirm('Sei sicuro di voler rimuovere questa area di miglioramento?')) {
         client.profile.improvementAreas.splice(index, 1);
@@ -268,8 +256,11 @@ function addMasterElement() { // Renamed to "Add Objective"
             return;
         }
 
-        const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-        const client = company.clients.find(c => c.id === appData.currentClientId);
+        const client = getCurrentClient();
+        if (!client) {
+            document.body.removeChild(overlay);
+            return;
+        }
         
         // Controlla se l'obiettivo esiste già per questo cliente
         const existingObjective = client.masterElements.find(el => el.name === name);
@@ -301,8 +292,8 @@ function addMasterElement() { // Renamed to "Add Objective"
 function removeMasterElement(index) { // Renamed to "Remove Objective"
     if (!confirm('Sei sicuro di voler rimuovere questo obiettivo e tutti i suoi micro obiettivi?')) return;
     
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     client.masterElements.splice(index, 1);
     saveDataToLocalStorage();
@@ -319,8 +310,8 @@ function addSubElement(masterIndex) { // Renamed to "Add Micro Objective"
     const tagsInput = prompt('Inserisci i tag per questo micro obiettivo (separati da virgola, es: "Urgente, Priorità Alta"):', '');
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : [];
     
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     client.masterElements[masterIndex].subElements.push({
         name: name,
@@ -334,8 +325,8 @@ function addSubElement(masterIndex) { // Renamed to "Add Micro Objective"
 }
 
 function toggleSubElement(masterIndex, subIndex) {
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     client.masterElements[masterIndex].subElements[subIndex].completed = 
         !client.masterElements[masterIndex].subElements[subIndex].completed;
@@ -347,8 +338,8 @@ function toggleSubElement(masterIndex, subIndex) {
 function removeSubElement(masterIndex, subIndex) {
     if (!confirm('Sei sicuro di voler rimuovere questo micro obiettivo?')) return;
     
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     client.masterElements[masterIndex].subElements.splice(subIndex, 1);
     saveDataToLocalStorage();
@@ -364,8 +355,8 @@ function addClientTodo() {
     const tagsInput = prompt('Inserisci i tag per questo To-Do (separati da virgola, es: "Urgente, Priorità Alta"):', '');
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : [];
 
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     client.todos.push({
         text: text,
@@ -379,8 +370,8 @@ function addClientTodo() {
 }
 
 function saveSession() {
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = company.clients.find(c => c.id === appData.currentClientId);
+    const client = getCurrentClient();
+    if (!client) return;
     
     const hours = parseFloat(document.getElementById('sessionHours').value);
     if (isNaN(hours) || hours <= 0) {
@@ -416,8 +407,9 @@ function saveClientData() {
 }
 
 function generateHRReport() {
-    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
-    const client = appData.companies.find(c => c.id === appData.currentCompanyId)?.clients.find(cl => cl.id === appData.currentClientId);
+    const client = getCurrentClient();
+    const company = appData.currentSessionType === 'company' ?
+        appData.companies.find(c => c.id === appData.currentCompanyId) : null;
 
     if (!client) {
         alert('Nessun cliente selezionato per generare il report.');
@@ -435,7 +427,7 @@ function generateHRReport() {
     doc.setFontSize(12);
     doc.setTextColor(52, 73, 94); // Slightly lighter blue-grey
     doc.text(`Data: ${new Date().toLocaleDateString('it-IT')}`, 20, 35);
-    doc.text(`Azienda: ${company.name}`, 20, 45);
+    doc.text(`Azienda: ${company ? company.name : 'Cliente Privato'}`, 20, 45);
     doc.text(`Cliente: ${client.firstName} ${client.lastName}`, 20, 55);
 
     // Session info
