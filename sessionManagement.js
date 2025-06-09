@@ -2,6 +2,7 @@
 // Funzioni per la gestione delle sessioni e del profilo cliente
 
 function loadCompaniesForSessionSelection() {
+    appData.currentSessionType = 'company';
     const select = document.getElementById('sessionCompanySelect');
     select.innerHTML = '<option value="">Seleziona un\'azienda...</option>';
     
@@ -40,6 +41,44 @@ function loadCompaniesForSessionSelection() {
     document.getElementById('sessionCompanySelectionCard').style.display = 'block';
     document.getElementById('sessionClientSelectionCard').style.display = 'none';
     document.getElementById('clientSessionView').style.display = 'none';
+}
+
+function loadPrivateClientsForSessionSelection() {
+    appData.currentSessionType = 'private';
+    const grid = document.getElementById('sessionPrivateClientGrid');
+    grid.innerHTML = '';
+
+    if (appData.privateClients.length === 0) {
+        grid.innerHTML = '<p class="text-center">Nessun cliente privato disponibile.</p>';
+    } else {
+        appData.privateClients.forEach(client => {
+            const card = document.createElement('div');
+            card.className = 'client-select-card';
+            card.innerHTML = `<h3>${client.firstName} ${client.lastName}</h3>`;
+            card.onclick = () => showPrivateClientCard(client.id);
+            grid.appendChild(card);
+        });
+    }
+
+    document.getElementById('sessionPrivateSelectionCard').style.display = 'block';
+    document.getElementById('sessionCompanySelectionCard').style.display = 'none';
+    document.getElementById('sessionClientSelectionCard').style.display = 'none';
+    document.getElementById('clientSessionView').style.display = 'none';
+    document.getElementById('privateClientView').style.display = 'none';
+}
+
+function showPrivateClientCard(clientId) {
+    const client = appData.privateClients.find(c => c.id === clientId);
+    if (!client) return;
+
+    appData.currentClientId = clientId;
+    document.getElementById('privateClientNameDisplay').textContent = `${client.firstName} ${client.lastName}`;
+    document.getElementById('privateClientInfoDisplay').innerHTML = `
+        <p><strong>Telefono:</strong> ${client.phone || ''}</p>
+        <p><strong>Email:</strong> ${client.email || ''}</p>`;
+
+    document.getElementById('privateClientView').style.display = 'block';
+    document.getElementById('sessionPrivateSelectionCard').style.display = 'none';
 }
 
 
