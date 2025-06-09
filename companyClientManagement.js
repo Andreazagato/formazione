@@ -112,6 +112,8 @@ function addPrivateClient() {
     const lastName = document.getElementById('privateLastName').value.trim();
     const phone = document.getElementById('privatePhone').value.trim();
     const email = document.getElementById('privateEmail').value.trim();
+    const plannedSessions = parseInt(document.getElementById('privatePlannedSessions').value);
+    const hoursPerSession = parseFloat(document.getElementById('privateHoursPerSession').value);
 
     if (!firstName || !lastName) {
         alert('Inserisci nome e cognome');
@@ -123,7 +125,19 @@ function addPrivateClient() {
         firstName,
         lastName,
         phone,
-        email
+        email,
+        plannedSessions: isNaN(plannedSessions) ? 10 : plannedSessions,
+        hoursPerSession: isNaN(hoursPerSession) ? 1.5 : hoursPerSession,
+        completedSessions: 0,
+        profile: {
+            habits: [],
+            strengths: [],
+            improvementAreas: [],
+            compliance: 'good'
+        },
+        masterElements: [],
+        todos: [],
+        sessionHistory: []
     };
 
     appData.privateClients.push(client);
@@ -145,6 +159,8 @@ function showAddPrivateClientModal() {
     document.getElementById('privateLastName').value = '';
     document.getElementById('privatePhone').value = '';
     document.getElementById('privateEmail').value = '';
+    document.getElementById('privatePlannedSessions').value = '10';
+    document.getElementById('privateHoursPerSession').value = '1.5';
     showModal('addPrivateClientModal');
 }
 

@@ -53,3 +53,11 @@ function handleImport(event) {
     };
     reader.readAsText(file);
 }
+
+function getCurrentClient() {
+    if (appData.currentSessionType === 'private') {
+        return appData.privateClients.find(c => c.id === appData.currentClientId) || null;
+    }
+    const company = appData.companies.find(c => c.id === appData.currentCompanyId);
+    return company ? company.clients.find(c => c.id === appData.currentClientId) : null;
+}
