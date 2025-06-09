@@ -6,5 +6,6 @@ let appData = {
     tags: ['Urgente', 'In progress', 'Completato', 'Da rivedere', 'Alta Priorità', 'Bassa Priorità'],
     globalTodos: [],
     currentCompanyId: null,
-    currentClientId: null
+    currentClientId: null,
+    currentSessionType: 'company'
 };

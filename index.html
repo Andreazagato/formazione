@@ -73,6 +73,14 @@
             </section>
 
             <section id="sessions" class="content-section">
+                <div class="card" id="sessionTypeCard">
+                    <h2>Tipo di Cliente</h2>
+                    <select id="sessionTypeSelect" class="form-select">
+                        <option value="company">Azienda</option>
+                        <option value="private">Privato</option>
+                    </select>
+                </div>
+
                 <div class="card" id="sessionCompanySelectionCard">
                     <h2>Seleziona Azienda</h2>
                     <select id="sessionCompanySelect" class="form-select">
@@ -84,6 +92,11 @@
                 <div class="card" id="sessionClientSelectionCard" style="display: none;">
                     <h2>Seleziona Cliente</h2>
                     <div class="client-select-grid" id="clientSelectGrid"></div>
+                </div>
+
+                <div class="card" id="sessionPrivateSelectionCard" style="display: none;">
+                    <h2>Seleziona Cliente Privato</h2>
+                    <div class="client-select-grid" id="sessionPrivateClientGrid"></div>
                 </div>
 
                 <div id="clientSessionView" style="display: none;">
@@ -160,6 +173,15 @@
                         <button class="btn btn-secondary" onclick="window.print()">Stampa Scheda Cliente</button>
                         <button class="btn btn-info" onclick="generateHRReport()">Genera Report (PDF)</button>
                         <button class="btn btn-warning" onclick="saveClientData()">Salva Modifiche</button>
+                    </div>
+                </div>
+
+                <div id="privateClientView" style="display: none;">
+                    <div class="card client-info-card">
+                        <div class="client-header">
+                            <h2 id="privateClientNameDisplay"></h2>
+                        </div>
+                        <div id="privateClientInfoDisplay"></div>
                     </div>
                 </div>
             </section>
@@ -318,7 +340,17 @@
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.style.display = 'none';
             });
-            showSection('dashboard'); 
+            const modeSelect = document.getElementById('sessionTypeSelect');
+            if (modeSelect) {
+                modeSelect.addEventListener('change', () => {
+                    if (modeSelect.value === 'private') {
+                        loadPrivateClientsForSessionSelection();
+                    } else {
+                        loadCompaniesForSessionSelection();
+                    }
+                });
+            }
+            showSection('dashboard');
         }
 
         function setupNavigation() {
@@ -344,7 +376,12 @@
             if (sectionId === 'companies') {
                 renderCompanies();
             } else if (sectionId === 'sessions') {
-                loadCompaniesForSessionSelection();
+                const modeSelect = document.getElementById('sessionTypeSelect');
+                if (modeSelect && modeSelect.value === 'private') {
+                    loadPrivateClientsForSessionSelection();
+                } else {
+                    loadCompaniesForSessionSelection();
+                }
             } else if (sectionId === 'private') {
                 renderPrivateClients();
             } else if (sectionId === 'dashboard') {
