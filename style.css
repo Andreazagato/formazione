@@ -354,6 +354,19 @@ body {
     box-shadow: 0 2px 8px rgba(60, 64, 67, 0.15);
 }
 
+/* Table summary for private clients */
+.summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+.summary-table th,
+.summary-table td {
+    padding: 8px;
+    border: 1px solid #dadce0;
+    text-align: left;
+}
+
 .stat-card h3 {
     color: #70757a; /* Colore testo più chiaro */
     font-size: 0.8em; /* Dimensione più piccola */

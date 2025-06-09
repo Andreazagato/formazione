@@ -20,6 +20,7 @@
                 <div class="nav-tab active" data-section="dashboard">Dashboard</div>
                 <div class="nav-tab" data-section="companies">Aziende</div>
                 <div class="nav-tab" data-section="sessions">Sessioni</div>
+                <div class="nav-tab" data-section="private">Privati</div>
                 <div class="nav-tab" data-section="settings">Impostazioni</div>
             </nav>
             <div class="sidebar-footer">
@@ -163,6 +164,32 @@
                 </div>
             </section>
 
+            <section id="private" class="content-section">
+                <div class="card header-card">
+                    <h2>Gestione Clienti Privati</h2>
+                    <button class="btn btn-primary" onclick="showAddPrivateClientModal()">Aggiungi Cliente</button>
+                </div>
+                <div class="client-grid" id="privateClientGrid"></div>
+                <div class="card">
+                    <h3>Riepilogo Clienti</h3>
+                    <div class="form-group">
+                        <input type="text" id="privateClientSearch" class="form-control" placeholder="Filtra per nome..." oninput="renderPrivateClients()">
+                    </div>
+                    <div id="privateClientCount" class="mb-2"></div>
+                    <table id="privateClientTable" class="summary-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Cognome</th>
+                                <th>Telefono</th>
+                                <th>E-mail</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
             <section id="settings" class="content-section">
                 <div class="settings-grid">
                     <div class="card">
@@ -241,6 +268,32 @@
         </div>
     </div>
 
+    <div id="addPrivateClientModal" class="modal">
+        <div class="modal-content">
+            <h2>Aggiungi Cliente Privato</h2>
+            <div class="form-group">
+                <label for="privateFirstName">Nome</label>
+                <input type="text" id="privateFirstName" class="form-control" placeholder="Nome...">
+            </div>
+            <div class="form-group">
+                <label for="privateLastName">Cognome</label>
+                <input type="text" id="privateLastName" class="form-control" placeholder="Cognome...">
+            </div>
+            <div class="form-group">
+                <label for="privatePhone">Telefono</label>
+                <input type="text" id="privatePhone" class="form-control" placeholder="Telefono...">
+            </div>
+            <div class="form-group">
+                <label for="privateEmail">E-mail</label>
+                <input type="email" id="privateEmail" class="form-control" placeholder="E-mail...">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="addPrivateClient()">Salva</button>
+                <button class="btn btn-secondary" onclick="closeModal('addPrivateClientModal')">Annulla</button>
+            </div>
+        </div>
+    </div>
+
     <script src="data.js"></script>
     <script src="utils.js"></script>
     <script src="dom.js"></script>
@@ -292,6 +345,8 @@
                 renderCompanies();
             } else if (sectionId === 'sessions') {
                 loadCompaniesForSessionSelection();
+            } else if (sectionId === 'private') {
+                renderPrivateClients();
             } else if (sectionId === 'dashboard') {
                 updateDashboard();
             }
